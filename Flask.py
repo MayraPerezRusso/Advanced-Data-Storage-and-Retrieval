@@ -54,13 +54,14 @@ def precipitation():
     results = session.query(Measurement.date,Measurement.prcp).all()
 
     # Convert list of tuples into normal list
-    all_prcp=[]
-    for result in results:
-        row["Date"]=results[0]
-        row["prcp"]=results[1]
-        all_prcp.append(row)
-
+    all_prcp=list(np.ravel(results))
+    # for result in results:
+    #     row["Date"]=results[0]
+    #     row["prcp"]=results[1]
+    #     all_prcp.append(row)
+    session.close()
     return jsonify(all_prcp)
+
 
 
 @app.route("/api/v1.0/stations")
@@ -69,7 +70,7 @@ def stations():
     results2 = session.query(Measurement.station).group_by(Measurement.station).all()
 
     all_station = list(np.ravel(results2))
-
+    session.close()
     return jsonify(all_station)
 
 @app.route("/api/v1.0/tobs")
@@ -82,7 +83,7 @@ def tobs():
         filter(Measurement.date > twelvemonths_agoday).all()
    
     all_tobs = list(np.ravel(results3))
-
+    session.close()
     return jsonify(all_tobs)
 
 @app.route("/api/v1.0/<start>")
@@ -90,16 +91,18 @@ def date(start):
    
     results4 = session.query(func.min(Measurement.tobs), func.avg(Measurement.tobs), func.max(Measurement.tobs)).filter(Measurement.date >= start).all()
 
-    all_info = list(np.ravel(results4))    
+    all_info = list(np.ravel(results4)) 
+    session.close()   
     return jsonify(all_info)
-
+    
 @app.route("/api/v1.0/<start>/<end>")
 def date2(start,end):
    
     results5 = session.query(func.min(Measurement.tobs), func.avg(Measurement.tobs), func.max(Measurement.tobs)).filter(Measurement.date >= start).filter(Measurement.date <= end).all()
 
-    all_info2 = list(np.ravel(results5))    
+    all_info2 = list(np.ravel(results5)) 
+    session.close()   
     return jsonify(all_info2)
-
+    
 if __name__ == '__main__':
     app.run()
